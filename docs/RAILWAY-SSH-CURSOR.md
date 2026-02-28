@@ -32,6 +32,27 @@ O app expõe uma rota que **lista o conteúdo de `/data` via HTTP** (com a mesma
 
 ---
 
+## Abrir /data no Cursor como pasta (WebDAV)
+
+O app expõe **WebDAV** em `/dav` com a **mesma senha do `/setup`** (Basic Auth). No Windows você pode mapear como **pasta de rede** e abrir no Cursor para editar os arquivos do container como se fossem locais.
+
+**Passos no Windows:**
+
+1. Abra o **Explorador de Arquivos**.
+2. Clique com o botão direito em **Este Computador** → **Adicionar um local de rede** (ou **Map network drive** / **Adicionar unidade de rede**).
+3. Escolha **Um local de rede personalizado** (ou **Connect to a website**).
+4. **URL:**  
+   `https://SEU-DOMINIO.up.railway.app/dav`  
+   (ex.: `https://clawdbot-railway-template-production-da0f.up.railway.app/dav`)
+5. Avançar → marque **Iniciar sessão com um nome de utilizador e uma palavra-passe diferentes** (ou equivalente).
+6. **Nome de utilizador:** qualquer (ex.: `u`). **Palavra-passe:** a do **SETUP_PASSWORD** (variável no Railway).
+7. Concluir. Dê um nome ao atalho (ex.: "Railway /data").
+8. No **Cursor:** **File → Open Folder** e selecione essa pasta de rede. Pronto: você vê e edita os arquivos de `/data` do container.
+
+**Nota:** Se o Windows pedir "Secure WebDAV" ou não conectar, tente usar a URL com barra no final: `https://.../dav/`. A autenticação é a mesma do `/setup`.
+
+---
+
 ## Opção recomendada: Railway CLI (`railway ssh`)
 
 Não abre a pasta no Cursor, mas permite ver e editar arquivos no terminal:

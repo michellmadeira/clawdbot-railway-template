@@ -297,6 +297,125 @@ function requireSetupAuth(req, res, next) {
 
 const app = express();
 app.disable("x-powered-by");
+
+// WebDAV: mount before express.json() so PUT body stays raw. Same auth as /setup.
+const WEBDAV_ROOT = "/data";
+function resolveWebDavPath(urlPath) {
+  const decoded = decodeURIComponent(urlPath || "/").replace(/\\/g, "/");
+  const normalized = path.join(WEBDAV_ROOT, decoded);
+  const resolved = path.resolve(normalized);
+  return resolved.startsWith(path.resolve(WEBDAV_ROOT)) ? resolved : null;
+}
+function webdavHandler(req, res, next) {
+  const resolved = resolveWebDavPath(req.path.slice(1)); // req.path is after /dav
+  if (!resolved) return res.status(403).send("Forbidden");
+
+  const emitPropfind = (href, stat, isDir) => {
+    const lastmod = stat.mtime ? stat.mtime.toUTCString() : new Date().toUTCString();
+    const size = isDir ? "" : `<D:getcontentlength xmlns:D="DAV:">${stat.size ?? 0}</D:getcontentlength>`;
+    const type = isDir ? "<D:resourcetype xmlns:D=\"DAV:\"><D:collection/></D:resourcetype>" : "<D:resourcetype xmlns:D=\"DAV:\"/>";
+    return `<D:response xmlns:D="DAV:">
+  <D:href>${href}</D:href>
+  <D:propstat><D:prop><D:displayname>${escapeXml(path.basename(href) || "data")}</D:displayname>${type}${size}<D:getlastmodified xmlns:D="DAV:">${lastmod}</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat>
+</D:response>`;
+  };
+  function escapeXml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  if (req.method === "OPTIONS") {
+    res.set("DAV", "1, 2");
+    res.set("Allow", "OPTIONS, PROPFIND, GET, HEAD, PUT, MKCOL, DELETE");
+    return res.sendStatus(200);
+  }
+
+  if (req.method === "PROPFIND") {
+    const depth = (req.headers.depth || "1").trim().toLowerCase();
+    try {
+      const stat = fs.statSync(resolved);
+      const isDir = stat.isDirectory();
+      let baseHref = `/dav${(req.path === "/" || !req.path) ? "/" : req.path}`.replace(/\/+/g, "/");
+      if (!baseHref.endsWith("/") && isDir) baseHref += "/";
+      let xml = `<?xml version="1.0" encoding="utf-8"?><D:multistatus xmlns:D="DAV:">${emitPropfind(baseHref, stat, isDir)}`;
+      if ((depth === "1" || depth === "infinity") && isDir) {
+        const entries = fs.readdirSync(resolved, { withFileTypes: true });
+        for (const e of entries) {
+          const name = e.name;
+          const subPath = path.join(resolved, name);
+          const subStat = fs.statSync(subPath);
+          const href = `${baseHref.replace(/\/$/, "")}/${encodeURIComponent(name)}${subStat.isDirectory() ? "/" : ""}`;
+          xml += emitPropfind(href, subStat, subStat.isDirectory());
+        }
+      }
+      xml += "</D:multistatus>";
+      res.set("Content-Type", "application/xml; charset=utf-8");
+      return res.status(207).send(xml);
+    } catch (err) {
+      if (err.code === "ENOENT") return res.status(404).send("Not Found");
+      return res.status(500).send(String(err.message));
+    }
+  }
+
+  if (req.method === "GET" || req.method === "HEAD") {
+    try {
+      const stat = fs.statSync(resolved);
+      if (stat.isDirectory()) return res.status(405).set("Allow", "PROPFIND").send("Method Not Allowed");
+      res.set("Content-Type", "application/octet-stream");
+      if (req.method === "HEAD") return res.sendStatus(200);
+      const stream = fs.createReadStream(resolved);
+      stream.on("error", (err) => res.status(500).send(String(err.message)));
+      stream.pipe(res);
+    } catch (err) {
+      if (err.code === "ENOENT") return res.status(404).send("Not Found");
+      return res.status(500).send(String(err.message));
+    }
+    return;
+  }
+
+  if (req.method === "PUT") {
+    const rawBody = [];
+    req.on("data", (c) => rawBody.push(c));
+    req.on("end", () => {
+      const body = Buffer.concat(rawBody);
+      try {
+        fs.mkdirSync(path.dirname(resolved), { recursive: true });
+        fs.writeFileSync(resolved, body, { flag: "w" });
+        return res.sendStatus(201);
+      } catch (err) {
+        return res.status(500).send(String(err.message));
+      }
+    });
+    req.on("error", () => res.status(500).send("Request error"));
+    return;
+  }
+
+  if (req.method === "MKCOL") {
+    try {
+      if (fs.existsSync(resolved)) return res.status(405).send("Method Not Allowed");
+      fs.mkdirSync(resolved, { recursive: true });
+      return res.sendStatus(201);
+    } catch (err) {
+      return res.status(500).send(String(err.message));
+    }
+  }
+
+  if (req.method === "DELETE") {
+    try {
+      if (!fs.existsSync(resolved)) return res.status(404).send("Not Found");
+      const stat = fs.statSync(resolved);
+      if (stat.isDirectory()) fs.rmSync(resolved, { recursive: true });
+      else fs.unlinkSync(resolved);
+      return res.sendStatus(204);
+    } catch (err) {
+      return res.status(500).send(String(err.message));
+    }
+  }
+
+  res.set("Allow", "OPTIONS, PROPFIND, GET, HEAD, PUT, MKCOL, DELETE");
+  res.status(405).send("Method Not Allowed");
+}
+app.use("/dav", requireSetupAuth, webdavHandler);
+
 app.use(express.json({ limit: "1mb" }));
 
 // Minimal health endpoint for Railway.
