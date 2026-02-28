@@ -40,6 +40,8 @@ Optional:
 
 **Onde está no servidor (evidência):** No container Railway o workspace fica em `/data/workspace` (variável `OPENCLAW_WORKSPACE_DIR`). A documentação fica em **`/data/workspace/docs/`**. Se você montar o mesmo volume via WebDAV no Windows como `Z:`, então `Z:\workspace\docs\` é o mesmo que `/data/workspace/docs/`. Para conferir no servidor (Railway CLI ou onde tiver acesso ao filesystem): `ls -la /data/workspace/docs` — devem aparecer os 5 ficheiros (AGENTE-RESEARCH.md, CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS.md, OPENCLAW-AGENTES-E-PESQUISA-ETAPAS.md, RESEARCH-FITBANK-CONTEXTO-E-FLUXO.md, RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md). Evidência local (com Z: montado): `Get-ChildItem Z:\workspace\docs` lista esses 5 ficheiros.
 
+**Commit / controle de origem:** Neste repositório, `git status` deve estar limpo (nothing to commit). Os 3 commits locais devem ser enviados com `git push`. Se o workspace tiver várias raízes (este repo + drive Z:), os ficheiros em Z: aparecem como não versionados (U) — é esperado; Z: não é parte deste repo.
+
 Notes:
 - This template pins OpenClaw to a released version by default via Docker build arg `OPENCLAW_GIT_REF` (override if you want `main`).
 
