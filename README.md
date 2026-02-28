@@ -34,6 +34,7 @@ Recommended:
 
 Optional:
 - `OPENCLAW_GATEWAY_TOKEN` — if not set, the wrapper generates one (not ideal). In a template, set it using a generated secret.
+- `RESEARCH_DB_URL` — Postgres URL for the Research FitBank pipeline (get/set/list por run_id e stage). **Definir no Railway** (variáveis de ambiente do container), não no GitHub. Ver [docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md](docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md).
 
 Notes:
 - This template pins OpenClaw to a released version by default via Docker build arg `OPENCLAW_GIT_REF` (override if you want `main`).
