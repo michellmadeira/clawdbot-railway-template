@@ -325,6 +325,27 @@ async function probeGateway() {
   });
 }
 
+// Validation: prove we can serve filesystem over HTTP (for WebDAV / file explorer).
+// GET /setup/api/files?path=/data (path must be under STATE_DIR or WORKSPACE_DIR). Auth: same as /setup.
+app.get("/setup/api/files", requireSetupAuth, (req, res) => {
+  const raw = (req.query.path || "").trim() || "/data";
+  const requested = path.resolve(raw);
+  const dataRoot = path.resolve("/data");
+  if (!requested.startsWith(dataRoot)) {
+    return res.status(400).json({ error: "path must be under /data" });
+  }
+  try {
+    const entries = fs.readdirSync(requested, { withFileTypes: true });
+    res.json({
+      ok: true,
+      path: requested,
+      entries: entries.map((d) => ({ name: d.name, dir: d.isDirectory() })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, code: err.code });
+  }
+});
+
 // Public health endpoint (no auth) so Railway can probe without /setup.
 // Keep this free of secrets.
 app.get("/healthz", async (_req, res) => {
@@ -420,7 +441,7 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
         <option value="openclaw.plugins.list">openclaw plugins list</option>
         <option value="openclaw.plugins.enable">openclaw plugins enable &lt;name&gt;</option>
       </select>
-      <input id="consoleArg" placeholder="Optional arg (e.g. 200, gateway.port)" style="flex: 1" />
+      <input id="consoleArg" placeholder="Optional arg (e.g. models, 200, gateway.port)" style="flex: 1" />
       <button id="consoleRun" style="background:#0f172a">Run</button>
     </div>
     <pre id="consoleOut" style="white-space:pre-wrap"></pre>
@@ -430,6 +451,11 @@ app.get("/setup", requireSetupAuth, (_req, res) => {
     <h2>Config editor (advanced)</h2>
     <p class="muted">Edits the full config file on disk (JSON5). Saving creates a timestamped <code>.bak-*</code> backup and restarts the gateway.</p>
     <div class="muted" id="configPath"></div>
+    <div style="margin-bottom:0.5rem">
+      <button id="configModelsCheck" style="background:#0f172a">Ver modelo vigente</button>
+      <span class="muted" style="margin-left:0.5rem">Confere qual modelo está em uso (ex.: 2.5-flash-lite). Após alterar o modelo no JSON, use Save e depois <code>gateway.restart</code> no Console.</span>
+    </div>
+    <pre id="configModelsOut" style="white-space:pre-wrap; min-height:1.5em; margin-bottom:0.5rem"></pre>
     <textarea id="configText" style="width:100%; height: 260px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;"></textarea>
     <div style="margin-top:0.5rem">
       <button id="configReload" style="background:#1f2937">Reload</button>
@@ -1085,6 +1111,23 @@ app.get("/setup/api/config/raw", requireSetupAuth, async (_req, res) => {
     const exists = fs.existsSync(p);
     const content = exists ? fs.readFileSync(p, "utf8") : "";
     res.json({ ok: true, path: p, exists, content });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: String(err) });
+  }
+});
+
+// Returns current models config so the user can verify which model is in effect (e.g. 2.5-flash-lite vs 2.0-flash).
+app.get("/setup/api/config/models", requireSetupAuth, async (_req, res) => {
+  try {
+    const p = configPath();
+    const r = await runCmd(OPENCLAW_NODE, clawArgs(["config", "get", "models"]));
+    const ok = r.code === 0;
+    res.json({
+      ok,
+      path: p,
+      output: r.output || "",
+      error: ok ? undefined : (r.output || "config get models failed"),
+    });
   } catch (err) {
     res.status(500).json({ ok: false, error: String(err) });
   }

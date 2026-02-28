@@ -1,0 +1,11 @@
+# SSH config para conectar ao Railway (clawbot) via Remote-SSH
+# Copie este bloco para ~/.ssh/config (Windows: C:\Users\SEU_USUARIO\.ssh\config)
+#
+# Depois: Cursor → Ctrl+Shift+P → Remote-SSH: Connect to Host → railway-clawbot
+#         File → Open Folder → /data
+# Senha: use a do SSH_PASSWORD (variável no Railway)
+
+Host railway-clawbot
+  HostName nozomi.proxy.rlwy.net
+  Port 42680
+  User michel

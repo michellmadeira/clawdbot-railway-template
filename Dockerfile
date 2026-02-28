@@ -50,7 +50,11 @@ RUN apt-get update \
     python3 \
     python3-venv \
     chromium \
-  && rm -rf /var/lib/apt/lists/*
+    openssh-server \
+  && rm -rf /var/lib/apt/lists/* \
+  && mkdir -p /run/sshd \
+  && echo "PermitRootLogin no" >> /etc/ssh/sshd_config \
+  && echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 
 # `openclaw update` expects pnpm. Provide it in the runtime image.
 RUN corepack enable && corepack prepare pnpm@10.23.0 --activate
@@ -63,6 +67,12 @@ ENV NPM_CONFIG_CACHE=/data/npm-cache
 ENV PNPM_HOME=/data/pnpm
 ENV PNPM_STORE_DIR=/data/pnpm-store
 ENV PATH="/data/npm/bin:/data/pnpm:${PATH}"
+
+# Default state + workspace dirs to the Railway volume.
+# These can be overridden by Railway env vars, but having sane image defaults
+# guarantees OpenClaw always uses /data by default.
+ENV OPENCLAW_STATE_DIR=/data/.openclaw
+ENV OPENCLAW_WORKSPACE_DIR=/data/workspace
 
 WORKDIR /app
 
@@ -78,6 +88,11 @@ RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"'
   && chmod +x /usr/local/bin/openclaw
 
 COPY src ./src
+COPY docker/entrypoint-with-ssh.sh /app/docker/entrypoint-with-ssh.sh
+RUN chmod +x /app/docker/entrypoint-with-ssh.sh
+
+# Optional: expose 22 for SSH when SSH_USERNAME/SSH_PASSWORD are set (use Railway TCP Proxy).
+EXPOSE 22
 
 # The wrapper listens on $PORT.
 # IMPORTANT: Do not set a default PORT here.
@@ -86,5 +101,5 @@ COPY src ./src
 EXPOSE 8080
 
 # Ensure PID 1 reaps zombies and forwards signals.
-ENTRYPOINT ["tini", "--"]
-CMD ["node", "src/server.js"]
+# When SSH_USERNAME and SSH_PASSWORD are set, entrypoint starts sshd then the app.
+ENTRYPOINT ["/app/docker/entrypoint-with-ssh.sh"]

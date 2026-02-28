@@ -222,6 +222,24 @@
     });
   }
 
+  // Ver modelo vigente: fetch current models config and show in configModelsOut
+  var configModelsOutEl = document.getElementById('configModelsOut');
+  var configModelsCheckEl = document.getElementById('configModelsCheck');
+  if (configModelsCheckEl && configModelsOutEl) {
+    configModelsCheckEl.onclick = function () {
+      configModelsOutEl.textContent = 'Carregando...';
+      return httpJson('/setup/api/config/models').then(function (j) {
+        if (j.ok) {
+          configModelsOutEl.textContent = 'Arquivo: ' + (j.path || '') + '\n\n' + (j.output || '(vazio)');
+        } else {
+          configModelsOutEl.textContent = 'Erro: ' + (j.error || j.output || 'config get models falhou');
+        }
+      }).catch(function (e) {
+        configModelsOutEl.textContent = 'Erro: ' + String(e);
+      });
+    };
+  }
+
   function saveConfigRaw() {
     if (!configTextEl) return;
     if (!confirm('Save config and restart gateway? A timestamped .bak backup will be created.')) return;

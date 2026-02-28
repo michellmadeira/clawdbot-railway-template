@@ -87,6 +87,23 @@ What does *not* persist cleanly:
 - `apt-get install ...` (installs into `/usr/*`)
 - Homebrew installs (typically `/opt/homebrew` or similar)
 
+### Accessing /data via Railway CLI (SSH)
+
+To read or edit files on the volume (e.g. config, sessions, or to clear a session model override):
+
+1. Install the [Railway CLI](https://docs.railway.app/develop/cli) and log in: `railway login`
+2. In your project directory, link the project: `railway link` (select the project and service)
+3. Open a shell inside the running container: `railway ssh`
+4. Use normal Unix commands; the volume is at `/data`:
+   - List: `ls -la /data` and `ls -la /data/.openclaw`
+   - Read config: `cat /data/.openclaw/openclaw.json`
+   - Read session store: `cat /data/.openclaw/agents/main/sessions/sessions.json`
+   - Edit (if available): `nano /data/.openclaw/agents/main/sessions/sessions.json` — remove `"model"` and `"modelProvider"` from the session entry to clear the override, then save and exit. Restart the gateway from `/setup` → Debug Console → `gateway.restart`.
+
+Railway does not provide a graphical file browser for volumes; `railway ssh` is the way to access the filesystem.
+
+To use **Cursor (or VS Code) Remote-SSH** to open `/data` as a folder, you can enable optional SSH in this container and use Railway's TCP Proxy. See **[docs/RAILWAY-SSH-CURSOR.md](docs/RAILWAY-SSH-CURSOR.md)** and **ssh-config-railway.example** for variables, TCP Proxy setup, and a ready-to-paste `~/.ssh/config` block.
+
 ### Optional bootstrap hook
 
 If `/data/workspace/bootstrap.sh` exists, the wrapper will run it on startup (best-effort) before starting the gateway.

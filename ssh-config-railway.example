@@ -1,0 +1,14 @@
+# Cole este bloco no seu ~/.ssh/config (Windows: C:\Users\SEU_USUARIO\.ssh\config)
+# Substitua SEU_HOST_RAILWAY pela URL do TCP Proxy (ex.: mainline.proxy.rlwy.net)
+# Substitua PORTA_RAILWAY pela porta exibida no Railway (ex.: 30899)
+# Substitua SEU_USUARIO pelo valor de SSH_USERNAME (ex.: railway)
+#
+# Depois: no Cursor → Ctrl+Shift+P → Remote-SSH: Connect to Host → railway-clawbot
+#         File → Open Folder → /data
+
+Host railway-clawbot
+  HostName SEU_HOST_RAILWAY
+  Port PORTA_RAILWAY
+  User SEU_USUARIO
+  # Se usar chave em vez de senha, descomente e ajuste o caminho:
+  # IdentityFile "C:\Users\michel.madeira\.ssh\id_rsa"
