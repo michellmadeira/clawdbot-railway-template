@@ -20,7 +20,7 @@ O Craudião acompanha o estado via banco. Resumo: as **skills** são “o que fa
 
 A pasta **pesquisa-etapas** não faz parte deste pipeline: é um fluxo genérico (prompts em `references/` na ordem). Para o Research FitBank use apenas as 11 skills acima; o script de instalação não inclui pesquisa-etapas.
 
-Ver **[docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md](../docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md)**, **[docs/AGENTE-RESEARCH.md](../docs/AGENTE-RESEARCH.md)** e **[docs/CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS.md](../docs/CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS.md)** (conformidade com a doc oficial OpenClaw) para protocolo e variáveis de ambiente.
+A documentação de protocolo e do agente Research fica no **workspace do agente (drive)**, em `docs/` (ex.: `Z:\workspace\docs\` ou `/data/workspace/docs/`): AGENTE-RESEARCH.md, RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md, CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS.md. Não está no repositório (repo = código-fonte apenas).
 
 ## Onde instalar
 

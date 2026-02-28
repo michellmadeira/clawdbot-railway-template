@@ -34,7 +34,9 @@ Recommended:
 
 Optional:
 - `OPENCLAW_GATEWAY_TOKEN` — if not set, the wrapper generates one (not ideal). In a template, set it using a generated secret.
-- `RESEARCH_DB_URL` — Postgres URL for the Research FitBank pipeline (get/set/list por run_id e stage). **Definir no Railway** (variáveis de ambiente do container), não no GitHub. Ver [docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md](docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md).
+- `RESEARCH_DB_URL` — Postgres URL for the Research FitBank pipeline (get/set/list por run_id e stage). **Definir no Railway** (variáveis de ambiente do container), não no GitHub.
+
+**Documentação crítica para o Craudião:** este repositório é **código-fonte apenas**. A documentação que o agente lê (AGENTE-RESEARCH, RESEARCH-FITBANK-PIPELINE-PROTOCOLO, CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS, etc.) **não fica no repo**; deve estar no **workspace do agente** (drive), em `workspace/docs/`. Para repor os 5 docs no drive a partir do histórico do git: `.\scripts\restore-critical-docs-to-workspace.ps1` (usa `HEAD~1`; ou passe outro commit). O script `deploy-docs-to-workspace.ps1` publica apenas o que ainda existir em `docs/` do repo (ex.: RAILWAY-SSH-CURSOR.md).
 
 Notes:
 - This template pins OpenClaw to a released version by default via Docker build arg `OPENCLAW_GIT_REF` (override if you want `main`).

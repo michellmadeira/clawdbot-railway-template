@@ -15,8 +15,8 @@ Este diretório é o **template** do workspace do agente **Research** (orquestra
 
 2. **Configurar o OpenClaw** para reconhecer o agente Research: edite `openclaw.json` (em geral em `/data/.openclaw/openclaw.json`) e adicione o agente conforme `openclaw.json.example`. Ajuste os caminhos de `workspace` se necessário.
 
-3. **Roteamento:** configure o Gateway/UI para que pedidos de pesquisa sejam atendidos pelo agente `research` (binding, escolha do usuário ou delegação pelo Craudião). Ver [docs/AGENTE-RESEARCH.md](../docs/AGENTE-RESEARCH.md).
+3. **Roteamento:** configure o Gateway/UI para que pedidos de pesquisa sejam atendidos pelo agente `research` (binding, escolha do usuário ou delegação pelo Craudião). A documentação está no workspace do agente (drive), em `docs/AGENTE-RESEARCH.md`.
 
 4. **Variáveis de ambiente:** o container onde o OpenClaw roda precisa de `RESEARCH_DB_URL` (ou `RESEARCH_DB_PATH`) para a skill research-db-crud funcionar.
 
-Documentação completa: [docs/AGENTE-RESEARCH.md](../docs/AGENTE-RESEARCH.md), [docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md](../docs/RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md) e [docs/CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS.md](../docs/CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS.md) (estrutura de agentes e skills conforme doc OpenClaw).
+Documentação completa no **workspace (drive)** em `docs/`: AGENTE-RESEARCH.md, RESEARCH-FITBANK-PIPELINE-PROTOCOLO.md, CONFORMIDADE-OPENCLAW-AGENTES-E-SKILLS.md. Repositório = código-fonte apenas.
