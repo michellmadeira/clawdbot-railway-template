@@ -21,8 +21,8 @@ RUN corepack enable
 WORKDIR /openclaw
 
 # Pin to a known-good ref (tag/branch). Override in Railway template settings if needed.
-# Using a released tag avoids build breakage when `main` temporarily references unpublished packages.
-ARG OPENCLAW_GIT_REF=v2026.2.26
+# v2026.3.2+ includes model.compact for dedicated compaction model (PR #11970).
+ARG OPENCLAW_GIT_REF=v2026.3.2
 RUN git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git .
 
 # Patch: relax version requirements for packages that may reference unpublished versions.
@@ -89,6 +89,8 @@ RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"'
 
 COPY src ./src
 COPY docker/entrypoint-with-ssh.sh /app/docker/entrypoint-with-ssh.sh
+# Ensure LF line endings (avoids "bash\r: No such file or directory" when repo has CRLF)
+RUN sed -i 's/\r$//' /app/docker/entrypoint-with-ssh.sh
 RUN chmod +x /app/docker/entrypoint-with-ssh.sh
 
 # Optional: expose 22 for SSH when SSH_USERNAME/SSH_PASSWORD are set (use Railway TCP Proxy).
@@ -102,4 +104,5 @@ EXPOSE 8080
 
 # Ensure PID 1 reaps zombies and forwards signals.
 # When SSH_USERNAME and SSH_PASSWORD are set, entrypoint starts sshd then the app.
-ENTRYPOINT ["/app/docker/entrypoint-with-ssh.sh"]
+# Invoke via bash explicitly so CRLF in the script never breaks the shebang (bash\r).
+ENTRYPOINT ["/bin/bash", "/app/docker/entrypoint-with-ssh.sh"]
