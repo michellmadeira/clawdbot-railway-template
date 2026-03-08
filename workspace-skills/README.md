@@ -1,6 +1,8 @@
 # Skills do workspace OpenClaw
 
-Estas pastas são skills no formato [OpenClaw / AgentSkills](https://docs.openclaw.ai/skills). Para o agente enxergá-las, elas precisam estar em **`/skills`** dentro do workspace do agente.
+**Papel desta pasta no repo:** cópia de **referência** para versionamento e para o script `install-workspace-skills.ps1` copiar para o drive (Z:). **O que o OpenClaw executa fica no Z:** (`Z:\workspace\skills\`). Edite skills e scripts do agente no drive; use esta pasta para versionar no Git e repor no drive quando necessário. Ver `docs/ARQUITETURA-REPO-VS-DRIVE.md`.
+
+Estas pastas são skills no formato [OpenClaw / AgentSkills](https://docs.openclaw.ai/skills). Para o agente enxergá-las, elas precisam estar em **`/skills`** dentro do workspace do agente (no drive).
 
 ## Arquitetura: Craudião + agente Research
 

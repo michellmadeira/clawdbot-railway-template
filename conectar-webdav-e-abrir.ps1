@@ -1,8 +1,11 @@
 # Mapeia WebDAV (Railway /data) como drive e abre Cursor com projeto local + pasta remota no mesmo workspace.
 # Requer: Railway CLI logado e projeto linkado (railway link).
+# Credenciais: SETUP_PASSWORD nas variaveis do Railway (script obtem via railway variables --json).
+# Ver docs/ACESSO-Z-WEBDAV-CREDENCIAIS.md para desmontar/remontar Z: e resetar senha.
 
 $ErrorActionPreference = "Stop"
-$webdavUrl = "https://clawdbot-railway-template-production-da0f.up.railway.app/dav"
+# URL do WebDAV: use env WEBDAV_URL se definido; senao usa o valor abaixo (ajuste se seu deploy tiver outro dominio).
+$webdavUrl = if ($env:WEBDAV_URL) { $env:WEBDAV_URL.Trim() } else { "https://clawdbot-railway-template-production-da0f.up.railway.app/dav" }
 $driveLetter = "Z:"
 $user = "u"
 

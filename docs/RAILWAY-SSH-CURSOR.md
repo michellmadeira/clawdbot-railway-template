@@ -55,7 +55,7 @@ O app expõe **WebDAV** em `/dav` com a **mesma senha do `/setup`** (Basic Auth)
 
 ## Opção recomendada: Railway CLI (`railway ssh`)
 
-Não abre a pasta no Cursor, mas permite ver e editar arquivos no terminal:
+Não abre a pasta no Cursor, mas permite ver e editar arquivos no terminal. **Para onde ficam credenciais, IDs (project/environment/service) e comandos úteis (`openclaw status`, logs, health), ver [ACESSO-Z-WEBDAV-CREDENCIAIS.md](ACESSO-Z-WEBDAV-CREDENCIAIS.md)** (seção “Acesso ao container via Railway CLI”).
 
 ```bash
 railway link   # no diretório do projeto, se ainda não linkou

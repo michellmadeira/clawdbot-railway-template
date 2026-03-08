@@ -22,6 +22,10 @@ O script `research-db.js` usa a tabela **`research_runs`** (criada automaticamen
 
 **Por que `run_id`:** o handoff entre etapas exige um identificador único por “pesquisa” (uma execução do pipeline). Sem ele não dá para ter várias runs em paralelo nem saber de qual run ler/gravar. O padrão da skill (get/set/list por identificador + stage) segue o formato usual de OpenClaw skills (procedimento + script); o nome `run_id` é convenção nossa para esse identificador. Não é o `runId` do OpenClaw (que identifica uma execução de sub-agente em `sessions_spawn`). Pode ser UUID, slug ou o domínio. Com **RESEARCH_DB_PATH** (JSON), cada run vira arquivo `{run_id}.json`.
 
+### Documentos ICP/GTM no workspace (HDzinho)
+
+Os documentos de posicionamento FitBank por SVC ficam **apenas no HDzinho** em **`workspace/docs/fitbank-icp-gtm/`** (no container = `/data/workspace/docs/fitbank-icp-gtm/`). Pastas: `svc-1-bancos-fintechs`, `svc-2-erps`, `svc-3-mercado-capitais` (cada uma com arquivos `ICP_GTM-FitBank-*-YYYYMMDD.md`). Não há cópia no repo; editar direto no workspace. Ver `docs/FITBANK-ICP-GTM-HDINHO.md`.
+
 ### Tabelas de redação / SVC / leads (mesmo banco Postgres)
 
 No mesmo banco (RESEARCH_DB_URL) existem as tabelas abaixo, consultadas/atualizadas pelo processo de redação e pelo pipeline. Schema obtido por consulta ao `information_schema` (para re-mapear: `RESEARCH_DB_URL=... node scripts/inspect-tables.js`).
@@ -43,9 +47,13 @@ No mesmo banco (RESEARCH_DB_URL) existem as tabelas abaixo, consultadas/atualiza
 | createdate | timestamp with time zone | YES | now() | |
 | updatedate | timestamp with time zone | YES | now() | |
 
+**Inserir SVC (só coluna `svc`; id e datas por default/trigger):** use o script `scripts/insert-svc.js`. Exemplo: `RESEARCH_DB_URL=... node scripts/insert-svc.js scripts/svc-payload-fitbank-erpbank.json` ou, com variáveis do Railway: `railway run node workspace-skills/research-db-crud/scripts/insert-svc.js workspace-skills/research-db-crud/scripts/svc-payload-fitbank-erpbank.json`. O script aceita um JSON (objeto ou array de um elemento) e faz `INSERT INTO sdria_redacao_svc_20260130 (svc) VALUES ($1) RETURNING id, createdate`.
+
 ---
 
-#### `sdria_redacao_leads_20260130`
+#### Tabela 3 — `sdria_redacao_leads_20260130`
+
+Leads/empresas e etapas do funil. Estrutura para escrita (transpose e demais etapas):
 
 | Coluna | Tipo | Null | Default |
 |--------|------|------|---------|
@@ -85,7 +93,9 @@ No mesmo banco (RESEARCH_DB_URL) existem as tabelas abaixo, consultadas/atualiza
 
 ---
 
-#### `sdria_redacao_20251014`
+#### Tabela 2 — `sdria_redacao_20251014`
+
+Run principal por domínio (profile, search, info e status). Estrutura para leitura/escrita:
 
 | Coluna | Tipo | Null | Default |
 |--------|------|------|---------|
@@ -101,6 +111,35 @@ No mesmo banco (RESEARCH_DB_URL) existem as tabelas abaixo, consultadas/atualiza
 | info_status | text | YES | |
 | transpose_status | text | YES | |
 | id_svc | text | YES | (referência ao SVC) |
+
+---
+
+### Transpose: mapeamento do campo `search` → Tabela 3 (`sdria_redacao_leads_20260130`)
+
+O campo **`search`** da Tabela 2 é um JSON (lista de leads). Ao gravar na Tabela 3, use este mapeamento de campos (referência do fluxo n8n):
+
+| Coluna na Tabela 3 | Origem no JSON / contexto |
+|--------------------|---------------------------|
+| first_name | item do lead (contact) |
+| last_name | item do lead (contact) |
+| title | item do lead (contact) |
+| linkedin_url | item do lead (contact) |
+| company_name | info.data.name |
+| description | info.data.description |
+| domain | info.data.domain |
+| country | info.data.country |
+| size | info.data.size |
+| primary_industry | info.data.primary_industry |
+| company_linkedin_url | info.data.linkedin_url |
+| unique_selling_proposition_usp | profile.data['Unique Selling Proposition (USP)'] (n8n: campo USP do Profile; não confundir com Key Pain Points) |
+| industry_they_target | profile.data['Primary Target Industry'] |
+| targeted_job_titles | profile.data['Primary Decision-Maker (Job Title)'] |
+| target_company_headcount | profile.data['Target Company Headcount'] |
+| pain_points_they_solve_for_customers | profile.data['Key Pain Points Solved'] |
+| reasoning | item do lead |
+| company_id | id da linha na Tabela 2 (sdria_redacao_20251014) da empresa/run |
+
+Cada item da lista em `search` gera uma linha na Tabela 3. Os campos de empresa (info.data) e perfil (profile.data) podem vir da mesma run ou da linha correspondente na Tabela 2.
 
 ## Schema (tabela `research_runs`)
 
@@ -173,3 +212,9 @@ Use para validar quais etapas já estão concluídas antes de disparar a próxim
 4. **Salvar:** Gravar o resultado com `set <run_id> <sua_stage> <arquivo_resultado>`.
 
 O orquestrador usa `list <run_id>` para ver o que já está concluído e disparar a próxima etapa quando fizer sentido.
+
+---
+
+## Workers (etapas 1–9 com injeção de contexto)
+
+Os scripts do motor de workers (worker-lib.js, worker-company-info.js, worker-stage-2.js … worker-stage-9.js) e a documentação (PROTOCOLO_WORKERS.md, BLUEPRINT_WORKERS.md, DEPENDENCIAS_WORKERS.md, resposta/auditoria) ficam no **workspace do OpenClaw** (drive Z: ou `/data/workspace`), em `workspace/skills/research-db-crud/scripts/` e `workspace/docs/`. Este repositório não mantém cópia desses arquivos para evitar redundância; a versão canônica é a do drive.

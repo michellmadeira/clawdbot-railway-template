@@ -21,7 +21,7 @@ RUN corepack enable
 WORKDIR /openclaw
 
 # Pin to a known-good ref (tag/branch). Override in Railway template settings if needed.
-# v2026.3.2+ includes model.compact for dedicated compaction model (PR #11970).
+# v2026.3.2: model.compact not in this release (PR #11970 not in tag). See docs/COMPACT-MODEL-CONFIG.md.
 ARG OPENCLAW_GIT_REF=v2026.3.2
 RUN git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git .
 

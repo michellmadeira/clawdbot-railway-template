@@ -1,0 +1,17 @@
+---
+description: Quando o drive Z: (WebDAV Railway) sumir ou o usuário disser que "reconectou" e está zoado
+globs: 
+alwaysApply: false
+---
+
+# Reconectar drive Z: (WebDAV / Railway)
+
+O workspace openclaw inclui a pasta **Z:** mapeada para o WebDAV do Railway (/data do container). Se Z: não existir ou o usuário disser que "reconectou" e está "zoado":
+
+1. **Desconectar** (terminal): `net use Z: /delete /y`
+2. **Conectar de novo**: no repo `clawdbot-railway-template`, rodar `.\conectar-webdav-e-abrir.ps1`
+   - O script busca `SETUP_PASSWORD` no Railway e monta o WebDAV em Z:, depois abre o Cursor com o workspace correto.
+
+**Documentação completa:** `docs/ACESSO-Z-WEBDAV-CREDENCIAIS.md` (desmontar, remontar, resetar senha, URL).
+
+Credenciais ficam no Railway (Variables), não no repositório.

@@ -24,7 +24,7 @@ Você é o **worker da etapa 1**: **Company Info** — pesquisa firmográfica a 
 
 1. Carregue o prompt em `{baseDir}/references/prompt.txt` (Research_FitBank-Fluxo_Prompts-Company-Prompt_1-CompanyInfo).
 2. Use o payload lido: **dominio** (obrigatório) e, se houver, contexto do SVC. Substitua no prompt o placeholder (ex.: `{{ $json.dominio }}`) pelo dominio real.
-3. Execute a pesquisa e produza o output firmográfico conforme o prompt.
+3. **Chamada ao Gemini:** execute a pesquisa chamando a API Gemini com a estrutura em `references/chamada-gemini.md`: método POST, URL do modelo `gemini-3-flash-preview`, body com `contents` (prompt preenchido), `generationConfig` (thinkingLevel LOW, responseMimeType application/json, responseSchema conforme o arquivo), e `tools` com `googleSearch` e `urlContext`. Use a credencial Google do ambiente (ex.: GOOGLE_API_KEY). A resposta virá em JSON conforme o schema; use esse resultado como output da etapa.
 
 ### 3.3 Salvar o resultado no banco
 

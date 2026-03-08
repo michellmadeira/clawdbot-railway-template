@@ -6,10 +6,27 @@
  *   node research-db.js get <run_id> <stage>
  *   node research-db.js set <run_id> <stage> [arquivo_com_payload]
  *   node research-db.js list <run_id>
+ *
+ * STAGE_MAP: mapeamento stage → nome e dependências (ver DEPENDENCIAS_WORKERS.md).
  */
 
 const fs = require('fs');
 const path = require('path');
+
+/** Mapeamento stage → { name, deps }. deps = array de stages que precisam estar concluded antes. */
+const STAGE_MAP = {
+  input: { name: 'Entrada inicial', deps: [] },
+  0: { name: 'SVC', deps: ['input'] },
+  1: { name: 'Company Info', deps: ['input'] },
+  2: { name: 'Company Profile', deps: ['1'] },
+  3: { name: 'Company Contacts', deps: ['2'] },
+  4: { name: 'Profile Dive', deps: ['3'] },
+  5: { name: 'Pain', deps: ['4'] },
+  6: { name: 'UVP Match', deps: ['5'] },
+  7: { name: 'Case Study', deps: ['6'] },
+  8: { name: 'Email Builder', deps: ['7'] },
+  9: { name: 'Competitor', deps: ['8'] }
+};
 
 const [,, cmd, runId, stage, fileArg] = process.argv;
 

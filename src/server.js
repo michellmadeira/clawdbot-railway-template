@@ -3,8 +3,12 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import express from "express";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 import httpProxy from "http-proxy";
 import * as tar from "tar";
 
@@ -148,7 +152,7 @@ function sleep(ms) {
 }
 
 async function waitForGatewayReady(opts = {}) {
-  const timeoutMs = opts.timeoutMs ?? 20_000;
+  const timeoutMs = opts.timeoutMs ?? 45_000;
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
@@ -238,7 +242,7 @@ async function ensureGatewayRunning() {
       try {
         lastGatewayError = null;
         await startGateway();
-        const ready = await waitForGatewayReady({ timeoutMs: 20_000 });
+        const ready = await waitForGatewayReady({ timeoutMs: 45_000 });
         if (!ready) {
           throw new Error("Gateway did not become ready in time");
         }

@@ -12,6 +12,18 @@ Você é o **worker da etapa 0** do pipeline: geração do **Service Context (SV
 - **Etapa anterior no banco:** `input` (entrada inicial da run: documento da vertical e/ou material de dores).
 - Só execute se o registro `get <run_id> input` existir e tiver **status = concluded**.
 
+## Documentos ICP/GTM no workspace (HDzinho)
+
+Os documentos de posicionamento por vertical ficam **apenas no HDzinho** (workspace do OpenClaw = `/data/workspace` no container), em **`docs/fitbank-icp-gtm/`**, organizados por SVC id (igual ao banco):
+
+| SVC id | Pasta no workspace | Vertical |
+|--------|--------------------|----------|
+| 1 | `docs/fitbank-icp-gtm/svc-1-bancos-fintechs/` | Bancos e fintechs (Mercado Financeiro) |
+| 2 | `docs/fitbank-icp-gtm/svc-2-erps/` | ERPs e BPO (Gestão) |
+| 3 | `docs/fitbank-icp-gtm/svc-3-mercado-capitais/` | Mercado de capitais |
+
+Não há cópia no repositório; editar e versionar direto no workspace (ex.: quando Z: estiver montado). Em cada pasta: arquivos `ICP_GTM-FitBank-*-YYYYMMDD.md`; versionar com nova data ao atualizar. Ver `docs/FITBANK-ICP-GTM-HDINHO.md`.
+
 ## Protocolo (3 fases)
 
 ### 3.1 Ler o banco
